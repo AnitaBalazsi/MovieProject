@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/viewContainer"
+    tools:context=".Activities.RegisterActivity">
+
+    <TextView
+        android:id="@+id/registrationTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:layout_margin="30dp"
+        android:text="@string/registration" />
+
+    <EditText
+        android:id="@+id/usernameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/registrationTitle"
+        android:inputType="textPersonName"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:hint="@string/username"/>
+
+    <EditText
+        android:id="@+id/emailInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/usernameInput"
+        android:inputType="textEmailAddress"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:hint="@string/email" />
+
+    <EditText
+        android:id="@+id/passwordInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/emailInput"
+        android:inputType="textPassword"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:hint="@string/password" />
+
+    <EditText
+        android:id="@+id/confirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/passwordInput"
+        android:inputType="textPassword"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:hint="@string/confirmPassword" />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/confirmPassword"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="70dp"
+        android:text="@string/send" />
+
+</RelativeLayout>
