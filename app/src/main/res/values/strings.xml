@@ -14,4 +14,12 @@
     <string name="confirmPasswordError">Password doesn\'t match</string>
     <string name="alreadyRegistered">Username or e-mail is already registered!</string>
     <string name="loginInputError">Email or password is incorrect!</string>
+    <string name="homeScreen">Home</string>
+    <string name="profileScreen">Profile</string>
+    <string name="favouritesScreen">Favourites</string>
+    <string name="nowPlayingScreen">Now playing</string>
+    <string name="topRatedMovies">Top rated movies</string>
+    <string name="loading">Loading…</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
 </resources>
