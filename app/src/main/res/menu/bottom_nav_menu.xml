@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-        <item
-            android:id="@+id/menu_favourites"
-            android:enabled="true"
-            android:icon="@drawable/ic_launcher_background"
-            android:title="@string/favouritesScreen"/>
+
         <item
             android:id="@+id/menu_home"
             android:enabled="true"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@drawable/home_icon"
             android:title="@string/homeScreen" />
+        <item
+            android:id="@+id/menu_favourites"
+            android:enabled="true"
+            android:icon="@drawable/favourites_icon"
+            android:title="@string/favouritesScreen"/>
 
         <item
             android:id="@+id/menu_nowPlaying"
             android:enabled="true"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@drawable/nowplaying_icon"
             android:title="@string/nowPlayingScreen" />
 
         <item
             android:id="@+id/menu_profile"
             android:enabled="true"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@drawable/profile_icon"
             android:title="@string/profileScreen" />
 </menu>

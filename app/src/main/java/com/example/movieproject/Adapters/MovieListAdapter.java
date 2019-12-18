@@ -24,6 +24,10 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.List
         this.movieList = movieList;
     }
 
+    public void setMovieList(List<Movie> movieList) {
+        this.movieList = movieList;
+    }
+
     @NonNull
     @Override
     public MovieListAdapter.ListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -38,6 +42,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.List
         holder.movieTitle.setText(movieList.get(position).getTitle());
         holder.movieDate.setText(movieList.get(position).getReleaseDate());
         holder.movieOverview.setText(movieList.get(position).getOverview());
+        holder.movieRating.setText(String.valueOf(movieList.get(position).getVoteAverage()).concat("%"));
         Glide.with(holder.itemView.getContext()).load(MovieDbAPI.IMAGE_BASE_URL + movieList.get(position).getPosterPath()).into(holder.moviePoster);
     }
 
@@ -47,7 +52,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.List
     }
 
     public class ListViewHolder extends RecyclerView.ViewHolder {
-        private TextView movieTitle, movieDate, movieOverview;
+        private TextView movieTitle, movieDate, movieOverview, movieRating;
         private ImageView moviePoster;
 
         public ListViewHolder(@NonNull View itemView) {
@@ -57,6 +62,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.List
             movieTitle = itemView.findViewById(R.id.movieTitle);
             movieDate = itemView.findViewById(R.id.movieDate);
             movieOverview = itemView.findViewById(R.id.overview);
+            movieRating = itemView.findViewById(R.id.rating);
         }
     }
 }

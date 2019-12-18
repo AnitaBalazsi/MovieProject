@@ -13,4 +13,7 @@ public interface MovieDbAPI {
 
     @GET("movie/top_rated")
     Call<MoviesResponse> getTopRatedMovies(@Query("api_key") String apiKey, @Query("page") int page);
+
+    @GET("search/movie")
+    Call<MoviesResponse> searchMovie(@Query("api_key") String apiKey, @Query("page") int page, @Query("query") String query);
 }

@@ -6,13 +6,23 @@
     tools:context=".Fragments.HomeFragment">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:searchIcon="@null"
+            android:queryHint="@string/search"/>
+
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="25sp"
+            android:layout_below="@id/searchView"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:text="@string/topRatedMovies"
@@ -22,7 +32,7 @@
             android:id="@+id/movieListView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="15sp"
+            android:layout_margin="5dp"
             android:layout_below="@id/title"/>
 
         <Button

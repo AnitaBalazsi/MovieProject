@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SearchView;
 
 import com.example.movieproject.Adapters.MovieListAdapter;
 import com.example.movieproject.Classes.Movie;
@@ -35,13 +36,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment implements View.OnClickListener {
+public class HomeFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
     private static int pageNumber = 1;
-    private RecyclerView.Adapter adapter;
+    private Retrofit retrofit;
+    private MovieDbAPI api;
+    private MovieListAdapter adapter;
     private RecyclerView recyclerView;
     private ProgressDialog loadingDialog;
     private int totalPages;
     private Button nextButton, previousButton;
+    private SearchView searchView;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -59,32 +64,39 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         super.onViewCreated(view, savedInstanceState);
 
         initializeVariables();
-        getData(new OnGetMoviesCallback() {
-            @Override
-            public void onSuccess(List<Movie> movies) {
-                adapter = new MovieListAdapter(movies);
-                recyclerView.setAdapter(adapter);
+        loadingDialog.show();
+        getData();
 
-                if (pageNumber > 1){
-                    previousButton.setVisibility(View.VISIBLE);
-                }
-                if (pageNumber < totalPages){
-                    nextButton.setVisibility(View.VISIBLE);
-                }
-                loadingDialog.dismiss();
-            }
-        });
+        if (pageNumber > 1){
+            previousButton.setVisibility(View.VISIBLE);
+        }
+        if (pageNumber < totalPages){
+            nextButton.setVisibility(View.VISIBLE);
+        }
+
+        loadingDialog.dismiss();
     }
 
     private void initializeVariables() {
+        retrofit = new Retrofit.Builder()
+                .baseUrl(MovieDbAPI.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        api = retrofit.create(MovieDbAPI.class);
+
         recyclerView = getView().findViewById(R.id.movieListView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL));
         recyclerView.setNestedScrollingEnabled(false);
 
+        adapter = new MovieListAdapter(new ArrayList<Movie>());
+        recyclerView.setAdapter(adapter);
+
         loadingDialog = new ProgressDialog(getContext());
         loadingDialog.setMessage(getString(R.string.loading));
-        loadingDialog.show();
+
+        searchView = getView().findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(this);
 
         nextButton = getView().findViewById(R.id.nextButton);
         nextButton.setOnClickListener(this);
@@ -93,18 +105,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private void getData(final OnGetMoviesCallback callback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MovieDbAPI.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        MovieDbAPI api = retrofit.create(MovieDbAPI.class);
+    private void getData() {
         api.getTopRatedMovies(MovieDbAPI.API_KEY, pageNumber).enqueue(new Callback<MoviesResponse>() {
             @Override
             public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
                 if (response.body() != null){
                     totalPages = response.body().getPages();
-                    callback.onSuccess(response.body().getMovies());
+                    adapter.setMovieList(response.body().getMovies());
+                    adapter.notifyDataSetChanged();
+                    loadingDialog.dismiss();
                 }
             }
 
@@ -130,7 +139,26 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         getFragmentManager().beginTransaction().detach(this).attach(this).commit();
     }
 
-    public interface OnGetMoviesCallback {
-        void onSuccess(List<Movie> movies);
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        api.searchMovie(MovieDbAPI.API_KEY,pageNumber,query).enqueue(new Callback<MoviesResponse>() {
+            @Override
+            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+               adapter.setMovieList(response.body().getMovies());
+               adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<MoviesResponse> call, Throwable t) {
+
+            }
+        });
+        return false;
     }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
 }

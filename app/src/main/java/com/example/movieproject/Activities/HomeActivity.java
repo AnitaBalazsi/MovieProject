@@ -41,8 +41,8 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
 
     private void setupViewPager(){
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new FavouritesFragment());
         adapter.addFragment(new HomeFragment());
+        adapter.addFragment(new FavouritesFragment());
         adapter.addFragment(new NowPlayingFragment());
         adapter.addFragment(new ProfileFragment());
         viewPager.setAdapter(adapter);
@@ -62,10 +62,10 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         switch (menuItem.getItemId()){
-            case R.id.menu_favourites:
+            case R.id.menu_home:
                 viewPager.setCurrentItem(0);
                 return true;
-            case R.id.menu_home:
+            case R.id.menu_favourites:
                 viewPager.setCurrentItem(1);
                 return true;
             case R.id.menu_nowPlaying:
