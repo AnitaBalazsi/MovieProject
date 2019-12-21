@@ -2,6 +2,7 @@ package com.example.movieproject.Fragments;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,17 +16,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.SearchView;
 
-import com.example.movieproject.Adapters.MovieListAdapter;
+import com.example.movieproject.Activities.DetailsActivity;
+import com.example.movieproject.Helpers.MovieDb;
+import com.example.movieproject.Helpers.MovieListAdapter;
 import com.example.movieproject.Classes.Movie;
 import com.example.movieproject.Classes.MoviesResponse;
-import com.example.movieproject.MovieDbAPI;
+import com.example.movieproject.Helpers.MovieDbAPI;
 import com.example.movieproject.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,16 +39,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
+public class HomeFragment extends Fragment implements SearchView.OnQueryTextListener, MovieListAdapter.ListViewHolder.MovieClickListener {
     private static int pageNumber = 1;
-    private Retrofit retrofit;
-    private MovieDbAPI api;
     private MovieListAdapter adapter;
-    private RecyclerView recyclerView;
     private ProgressDialog loadingDialog;
-    private int totalPages;
-    private Button nextButton, previousButton;
-    private SearchView searchView;
+    private boolean isScrolling = false;
+    private int currentItems, totalItems, scrollOutItems;
+
 
     public HomeFragment() {
         // Required empty public constructor
@@ -64,54 +64,65 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sear
         super.onViewCreated(view, savedInstanceState);
 
         initializeVariables();
+
         loadingDialog.show();
         getData();
-
-        if (pageNumber > 1){
-            previousButton.setVisibility(View.VISIBLE);
-        }
-        if (pageNumber < totalPages){
-            nextButton.setVisibility(View.VISIBLE);
-        }
-
-        loadingDialog.dismiss();
     }
 
     private void initializeVariables() {
-        retrofit = new Retrofit.Builder()
-                .baseUrl(MovieDbAPI.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        api = retrofit.create(MovieDbAPI.class);
-
-        recyclerView = getView().findViewById(R.id.movieListView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerView recyclerView = getView().findViewById(R.id.movieListView);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL));
-        recyclerView.setNestedScrollingEnabled(false);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
+                {
+                    isScrolling = true;
+                }
+            }
 
-        adapter = new MovieListAdapter(new ArrayList<Movie>());
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                currentItems = layoutManager.getChildCount();
+                totalItems = layoutManager.getItemCount();
+                scrollOutItems = layoutManager.findFirstVisibleItemPosition();
+
+                if(isScrolling && (currentItems + scrollOutItems == totalItems))
+                {
+                    isScrolling = false;
+                    pageNumber++;
+                    getData();
+                }
+            }
+        });
+
+        adapter = new MovieListAdapter(new ArrayList<Movie>(),this);
         recyclerView.setAdapter(adapter);
 
         loadingDialog = new ProgressDialog(getContext());
         loadingDialog.setMessage(getString(R.string.loading));
 
-        searchView = getView().findViewById(R.id.searchView);
+        SearchView searchView = getView().findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(this);
+    }
 
-        nextButton = getView().findViewById(R.id.nextButton);
-        nextButton.setOnClickListener(this);
-        previousButton = getView().findViewById(R.id.previousButton);
-        previousButton.setOnClickListener(this);
-
+    public void onMovieClick(int position){
+        //open detail screen
+        Intent intent = new Intent(getActivity(), DetailsActivity.class);
+        intent.putExtra("movieId",adapter.getMovieList().get(position).getId());
+        startActivity(intent);
     }
 
     private void getData() {
-        api.getTopRatedMovies(MovieDbAPI.API_KEY, pageNumber).enqueue(new Callback<MoviesResponse>() {
+        MovieDb.getInstance().getTopRatedMovies(MovieDb.API_KEY, pageNumber).enqueue(new Callback<MoviesResponse>() {
             @Override
             public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
                 if (response.body() != null){
-                    totalPages = response.body().getPages();
-                    adapter.setMovieList(response.body().getMovies());
+                    adapter.addMovies(response.body().getMovies());
                     adapter.notifyDataSetChanged();
                     loadingDialog.dismiss();
                 }
@@ -126,22 +137,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sear
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.nextButton:
-                pageNumber++;
-                break;
-            case R.id.previousButton:
-                pageNumber--;
-        }
-
-        //refresh fragment
-        getFragmentManager().beginTransaction().detach(this).attach(this).commit();
-    }
-
-    @Override
     public boolean onQueryTextSubmit(String query) {
-        api.searchMovie(MovieDbAPI.API_KEY,pageNumber,query).enqueue(new Callback<MoviesResponse>() {
+        MovieDb.getInstance().searchMovie(MovieDb.API_KEY,pageNumber,query).enqueue(new Callback<MoviesResponse>() {
             @Override
             public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
                adapter.setMovieList(response.body().getMovies());
@@ -158,6 +155,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Sear
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        if (!newText.isEmpty()){
+            MovieDb.getInstance().searchMovie(MovieDb.API_KEY,pageNumber,newText).enqueue(new Callback<MoviesResponse>() {
+                @Override
+                public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+                    adapter.setMovieList(response.body().getMovies());
+                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onFailure(Call<MoviesResponse> call, Throwable t) {
+
+                }
+            });
+        } else {
+            getData();
+        }
         return false;
     }
 

@@ -8,14 +8,11 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.movieproject.Classes.User;
-import com.example.movieproject.DatabaseHelper;
+import com.example.movieproject.Helpers.DatabaseHelper;
 import com.example.movieproject.R;
 import com.example.movieproject.Utilities;
-
-import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText nameInput, emailInput, passwordInput, confirmPasswordInput;
@@ -51,7 +48,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             if (databaseHelper.checkIfRegistered(user)){
                 Utilities.displayErrorSnackbar(findViewById(R.id.viewContainer), getString(R.string.alreadyRegistered));
             } else {
-                databaseHelper.insert(user);
+                databaseHelper.insertUser(user);
                 startActivity(new Intent(RegisterActivity.this,LoginActivity.class));
             }
         }

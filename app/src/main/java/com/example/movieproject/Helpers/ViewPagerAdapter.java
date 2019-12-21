@@ -1,4 +1,4 @@
-package com.example.movieproject.Adapters;
+package com.example.movieproject.Helpers;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;

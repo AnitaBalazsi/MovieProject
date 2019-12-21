@@ -2,13 +2,12 @@ package com.example.movieproject.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.example.movieproject.Adapters.ViewPagerAdapter;
+import com.example.movieproject.Helpers.ViewPagerAdapter;
 import com.example.movieproject.Fragments.FavouritesFragment;
 import com.example.movieproject.Fragments.HomeFragment;
 import com.example.movieproject.Fragments.NowPlayingFragment;
@@ -21,6 +20,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     private BottomNavigationView bottomNavigationView;
     private ViewPagerAdapter adapter;
     private MenuItem selectedMenuItem;
+    private String currentUserEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +37,8 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
 
         viewPager = findViewById(R.id.viewPager);
         viewPager.addOnPageChangeListener(this);
+
+        currentUserEmail = getIntent().getStringExtra("email");
     }
 
     private void setupViewPager(){
@@ -91,5 +93,9 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    public String getCurrentUserEmail() {
+        return currentUserEmail;
     }
 }

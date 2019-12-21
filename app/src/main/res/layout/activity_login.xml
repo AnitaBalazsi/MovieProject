@@ -55,4 +55,12 @@
         android:layout_below="@id/loginButton"
         android:layout_margin="10dp"
         android:text="@string/createAccount" />
+
+    <CheckBox
+        android:id="@+id/rememberMe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/createAccount"
+        android:layout_centerHorizontal="true"
+        android:text="@string/rememberMe" />
 </RelativeLayout>

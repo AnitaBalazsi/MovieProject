@@ -4,23 +4,23 @@
         <item
             android:id="@+id/menu_home"
             android:enabled="true"
-            android:icon="@drawable/home_icon"
+            android:icon="@drawable/ic_home_black_24dp"
             android:title="@string/homeScreen" />
         <item
             android:id="@+id/menu_favourites"
             android:enabled="true"
-            android:icon="@drawable/favourites_icon"
+            android:icon="@drawable/ic_favorite_black_24dp"
             android:title="@string/favouritesScreen"/>
 
         <item
             android:id="@+id/menu_nowPlaying"
             android:enabled="true"
-            android:icon="@drawable/nowplaying_icon"
+            android:icon="@drawable/ic_movie_black_24dp"
             android:title="@string/nowPlayingScreen" />
 
         <item
             android:id="@+id/menu_profile"
             android:enabled="true"
-            android:icon="@drawable/profile_icon"
+            android:icon="@drawable/ic_account_circle_black_24dp"
             android:title="@string/profileScreen" />
 </menu>

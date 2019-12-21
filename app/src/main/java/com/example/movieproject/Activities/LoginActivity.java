@@ -3,19 +3,25 @@ package com.example.movieproject.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.movieproject.DatabaseHelper;
+import com.example.movieproject.Helpers.DatabaseHelper;
 import com.example.movieproject.R;
 import com.example.movieproject.Utilities;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private EditText emailInput, passwordInput;
     private String email, password;
     private DatabaseHelper databaseHelper;
+    private CheckBox rememberMe;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +40,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
+        rememberMe = findViewById(R.id.rememberMe);
+        rememberMe.setOnCheckedChangeListener(this);
+
+        sharedPreferences = getApplicationContext().getSharedPreferences("LoginData", MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        emailInput.setText(sharedPreferences.getString("email",null));
+        passwordInput.setText(sharedPreferences.getString("password", null));
+        rememberMe.setChecked(sharedPreferences.getBoolean("rememberMe",false));
+
         databaseHelper = new DatabaseHelper(this);
     }
 
@@ -43,7 +58,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.loginButton:
                 if (validateInputs()){
                     if (databaseHelper.checkEmailPassword(email,password)){
-                        startActivity(new Intent(LoginActivity.this,HomeActivity.class));
+                        Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
+                        intent.putExtra("email",email);
+                        startActivity(intent);
                     } else {
                         Utilities.displayErrorSnackbar(findViewById(R.id.viewContainer),getString(R.string.loginInputError));
                     }
@@ -71,5 +88,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         return true;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        //store data in shared preferences
+        if (isChecked){
+            editor.putString("email",emailInput.getText().toString().trim());
+            editor.putString("password",passwordInput.getText().toString().trim());
+            editor.putBoolean("rememberMe",true);
+            editor.apply();
+        } else {
+            Utilities.clearLoginData(this);
+        }
     }
 }
