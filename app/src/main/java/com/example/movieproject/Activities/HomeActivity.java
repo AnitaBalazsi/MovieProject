@@ -4,9 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
+import com.example.movieproject.Helpers.MovieDbService;
 import com.example.movieproject.Helpers.ViewPagerAdapter;
 import com.example.movieproject.Fragments.FavouritesFragment;
 import com.example.movieproject.Fragments.HomeFragment;

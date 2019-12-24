@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -12,12 +13,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.movieproject.Helpers.DatabaseHelper;
+import com.example.movieproject.Helpers.MovieDbService;
 import com.example.movieproject.R;
 import com.example.movieproject.Utilities;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private EditText emailInput, passwordInput;
-    private String email, password;
+    private String email,password;
+    public static String username;
     private DatabaseHelper databaseHelper;
     private CheckBox rememberMe;
     private SharedPreferences sharedPreferences;
@@ -29,6 +32,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
 
         initializeVariables();
+
+        startService(new Intent(this, MovieDbService.class));
     }
 
     private void initializeVariables() {
@@ -58,6 +63,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.loginButton:
                 if (validateInputs()){
                     if (databaseHelper.checkEmailPassword(email,password)){
+                        username = databaseHelper.getUsername(email);
+
                         Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
                         intent.putExtra("email",email);
                         startActivity(intent);
@@ -96,7 +103,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (isChecked){
             editor.putString("email",emailInput.getText().toString().trim());
             editor.putString("password",passwordInput.getText().toString().trim());
-            editor.putBoolean("rememberMe",true);
+            editor.putBoolean("rememberMe",rememberMe.isChecked());
             editor.apply();
         } else {
             Utilities.clearLoginData(this);

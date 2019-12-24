@@ -8,7 +8,6 @@
 
     <ImageView
         android:id="@+id/profilePicture"
-        android:src="@drawable/profile"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_margin="10dp" />
@@ -18,7 +17,17 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-    <TextView
+        <TextView
+            android:id="@+id/logOut"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="20dp"
+            android:textStyle="italic"
+            android:text="@string/logOut" />
+
+        <TextView
         android:id="@+id/username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,5 +39,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/uploadPicture"/>
+
+        <Button
+            android:id="@+id/changePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/changePassword"/>
     </LinearLayout>
 </LinearLayout>

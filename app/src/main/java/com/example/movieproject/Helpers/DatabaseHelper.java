@@ -6,37 +6,90 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.movieproject.Classes.Movie;
 import com.example.movieproject.Classes.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "MovieProject.db";
     private static final String USERS_TABLE = "Users";
     private static final String IMAGES_TABLE = "Images";
+    private static final String FAVOURITES_TABLE = "Favourites";
+    private static final String NOWPLAYING_TABLE = "NowPlaying";
 
     public DatabaseHelper(@Nullable Context context) {
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, 2);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + USERS_TABLE + " (NAME TEXT PRIMARY KEY, EMAIL TEXT, PASSWORD TEXT)");
         db.execSQL("CREATE TABLE " + IMAGES_TABLE + " (NAME TEXT PRIMARY KEY, IMAGEDATA BLOB)");
+        db.execSQL("CREATE TABLE " + FAVOURITES_TABLE + " (NAME TEXT, ID INTEGER, MOVIE_TITLE TEXT, MOVIE_DATE TEXT, OVERVIEW TEXT, IMAGE_PATH TEXT, VOTE_AVERAGE REAL, PRIMARY KEY(NAME,ID)) ");
+        db.execSQL("CREATE TABLE " + NOWPLAYING_TABLE + " (ID INTEGER PRIMARY KEY, MOVIE_TITLE TEXT, MOVIE_DATE TEXT, OVERVIEW TEXT, IMAGE_PATH TEXT, VOTE_AVERAGE REAL) ");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + IMAGES_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + FAVOURITES_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + NOWPLAYING_TABLE);
+        onCreate(db);
     }
 
-    public void deleteImages(){
+    public void addFavouriteMovie(String user, Movie movie){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DROP TABLE IF EXISTS " + IMAGES_TABLE);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name",user);
+        contentValues.put("id",movie.getId());
+        contentValues.put("movie_title",movie.getTitle());
+        contentValues.put("movie_date",movie.getReleaseDate());
+        contentValues.put("overview",movie.getOverview());
+        contentValues.put("image_path",movie.getPosterPath());
+        contentValues.put("vote_average",movie.getVoteAverage());
+
+        db.insert(FAVOURITES_TABLE, null, contentValues);
+    }
+
+    public List<Movie> getFavourites(String user){
+        List<Movie> movies = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + FAVOURITES_TABLE + " WHERE NAME= '" + user + "'", null);
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                int id = cursor.getInt(1);
+                String title = cursor.getString(2);
+                String date = cursor.getString(3);
+                String overview = cursor.getString(4);
+                String image = cursor.getString(5);
+                double vote = cursor.getDouble(6);
+
+                movies.add(new Movie(title,id,date,overview,image,vote));
+
+                cursor.moveToNext();
+            }
+
+        }
+        return movies;
+    }
+
+    public boolean checkIfInFavourites(String user, Movie movie){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + FAVOURITES_TABLE + " WHERE NAME = '" + user + "' AND ID = '" + movie.getId() + "'",null);
+        return cursor.getCount() > 0;
+    }
+
+    public void deleteFromFavourites(String user, Movie movie){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(FAVOURITES_TABLE, "NAME = '" + user + "' AND ID = '" + movie.getId() + "'",null);
     }
 
     public void insertUser(User user){
@@ -47,15 +100,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put("password",user.getPassword());
 
         db.insert(USERS_TABLE, null, contentValues);
-    }
-
-    public void insertImage(String username, byte[] imageData){
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name",username);
-        contentValues.put("imagedata",imageData);
-
-        db.insert(IMAGES_TABLE, null, contentValues);
     }
 
     public boolean checkIfRegistered(User user){
@@ -81,16 +125,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return null;
     }
 
+    public long insertImage(String username, byte[] imageData){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name",username);
+        contentValues.put("imagedata",imageData);
+
+        return db.insert(IMAGES_TABLE, null, contentValues);
+    }
+
     public Bitmap getImage(String username){
         SQLiteDatabase db = this.getReadableDatabase();
-//        Cursor cursor = db.rawQuery("SELECT imagedata FROM " + IMAGES_TABLE + " WHERE NAME= '" + username + "'", null);
-  //      if (cursor.moveToFirst())
+        Cursor cursor = db.rawQuery("SELECT imagedata FROM " + IMAGES_TABLE + " WHERE NAME= '" + username + "'", null);
+        if (cursor.moveToFirst())
         {
-            //byte[] image = cursor.getBlob(cursor.getColumnIndex("imagedata"));
-            //Log.d("movies", String.valueOf(image.length));
-            //return BitmapFactory.decodeByteArray(image, 0, image.length);
+           Log.d("movies",cursor.getString(0));
         }
-     //   cursor.close();
+        cursor.close();
         return null;
+    }
+
+    public void changePassword(String username, String password){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("password",password);
+        db.update(USERS_TABLE,contentValues,"NAME = ?", new String[]{username});
+    }
+
+    public void deleteNowPlaying(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from "+ NOWPLAYING_TABLE);
+    }
+
+    public void addNowPlayingMovie(Movie movie){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put("id",movie.getId());
+        contentValues.put("movie_title",movie.getTitle());
+        contentValues.put("movie_date",movie.getReleaseDate());
+        contentValues.put("overview",movie.getOverview());
+        contentValues.put("image_path",movie.getPosterPath());
+        contentValues.put("vote_average",movie.getVoteAverage());
+
+        db.insert(NOWPLAYING_TABLE,null,contentValues);
+    }
+
+    public List<Movie> getNowPlaying(){
+        List<Movie> movies = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + NOWPLAYING_TABLE, null);
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                int id = cursor.getInt(0);
+                String title = cursor.getString(1);
+                String date = cursor.getString(2);
+                String overview = cursor.getString(3);
+                String image = cursor.getString(4);
+                double vote = cursor.getDouble(5);
+
+                movies.add(new Movie(title,id,date,overview,image,vote));
+
+                cursor.moveToNext();
+            }
+
+        }
+        return movies;
     }
 }

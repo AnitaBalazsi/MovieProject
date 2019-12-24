@@ -2,9 +2,10 @@ package com.example.movieproject.Classes;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Movie {
+public class Movie implements Serializable {
     @SerializedName("vote_count")
     private int voteCount;
     @SerializedName("id")
@@ -33,6 +34,15 @@ public class Movie {
     private String overview;
     @SerializedName("release_date")
     private String releaseDate;
+
+    public Movie(String title, int id, String releaseDate, String overview, String posterPath, double voteAverage ) {
+        this.voteAverage = voteAverage;
+        this.id = id;
+        this.title = title;
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+    }
 
     public int getVoteCount() {
         return voteCount;

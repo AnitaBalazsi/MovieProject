@@ -59,6 +59,8 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.List
         return movieList.size();
     }
 
+
+
     public static class ListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView movieTitle, movieDate, movieOverview, movieRating;
         private ImageView moviePoster;

@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.movieproject.Classes.Image;
@@ -14,8 +15,11 @@ import com.example.movieproject.Classes.Movie;
 import com.example.movieproject.Classes.RecommendationsResponse;
 import com.example.movieproject.Classes.Video;
 import com.example.movieproject.Classes.VideoResponse;
+import com.example.movieproject.Fragments.FavouritesFragment;
+import com.example.movieproject.Helpers.DatabaseHelper;
 import com.example.movieproject.Helpers.MovieDb;
 import com.example.movieproject.R;
+import com.example.movieproject.Utilities;
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -29,11 +33,12 @@ import retrofit2.Response;
 
 public class DetailsActivity extends YouTubeBaseActivity implements View.OnClickListener {
     private final String YOUTUBE_API_KEY = "AIzaSyAXOnWL0BvBZwWu9P4PPi6BUF3wOdn15n4";
-    private int movieId;
+    private Movie movie;
     private YouTubePlayerView videoView;
     private LinearLayout imageContainer, recommendationsContainer;
-    private ImageView backView;
+    private ImageView backView, addToFavourites;
     private TextView movieTitle, movieOverview;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +54,7 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
     }
 
     private void getMovieDetails() {
-        MovieDb.getInstance().getMovieDetails(movieId,MovieDb.API_KEY).enqueue(new Callback<Movie>() {
+        MovieDb.getInstance().getMovieDetails(movie.getId(),MovieDb.API_KEY).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
                 movieTitle.setText(response.body().getTitle());
@@ -64,7 +69,7 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
     }
 
     private void getRecommendations() {
-        MovieDb.getInstance().getRecommendations(movieId,MovieDb.API_KEY).enqueue(new Callback<RecommendationsResponse>() {
+        MovieDb.getInstance().getRecommendations(movie.getId(),MovieDb.API_KEY).enqueue(new Callback<RecommendationsResponse>() {
             @Override
             public void onResponse(Call<RecommendationsResponse> call, Response<RecommendationsResponse> response) {
                 if (response.body() != null){
@@ -110,7 +115,7 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
     }
 
     private void getImages() {
-        MovieDb.getInstance().getImages(movieId,MovieDb.API_KEY).enqueue(new Callback<ImagesReponse>() {
+        MovieDb.getInstance().getImages(movie.getId(),MovieDb.API_KEY).enqueue(new Callback<ImagesReponse>() {
             @Override
             public void onResponse(Call<ImagesReponse> call, Response<ImagesReponse> response) {
                 if (response.body() != null){
@@ -135,7 +140,8 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
     }
 
     private void initializeVariables() {
-        movieId = getIntent().getIntExtra("movieId",0);
+        databaseHelper = new DatabaseHelper(this);
+        movie = (Movie) getIntent().getSerializableExtra("selectedMovie");
 
         videoView = findViewById(R.id.movieTrailer);
         imageContainer = findViewById(R.id.images);
@@ -144,12 +150,20 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
         backView = findViewById(R.id.back);
         backView.setOnClickListener(this);
 
+        addToFavourites = findViewById(R.id.addToFavourites);
+        if (databaseHelper.checkIfInFavourites(LoginActivity.username, movie)){
+            addToFavourites.setImageDrawable(getDrawable(R.drawable.ic_favorite_black_24dp));
+        } else {
+            addToFavourites.setImageDrawable(getDrawable(R.drawable.ic_favorite_border_black_24dp));
+        }
+        addToFavourites.setOnClickListener(this);
+
         movieTitle = findViewById(R.id.movieTitle);
         movieOverview = findViewById(R.id.movieOverview);
     }
 
     private void getMovieTrailer() {
-        MovieDb.getInstance().getVideo(movieId,MovieDb.API_KEY).enqueue(new Callback<VideoResponse>() {
+        MovieDb.getInstance().getVideo(movie.getId(),MovieDb.API_KEY).enqueue(new Callback<VideoResponse>() {
             @Override
             public void onResponse(Call<VideoResponse> call, Response<VideoResponse> response) {
                 if (response.body() != null){
@@ -182,6 +196,26 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        finish();
+        switch (v.getId()){
+            case R.id.back:
+                finish();
+                break;
+            case R.id.addToFavourites:
+                if (addToFavourites.getDrawable().getConstantState().equals(getDrawable(R.drawable.ic_favorite_border_black_24dp).getConstantState())){
+                    //add to favourites
+                    databaseHelper.addFavouriteMovie(LoginActivity.username,movie);
+                    addToFavourites.setImageDrawable(getDrawable(R.drawable.ic_favorite_black_24dp));
+
+                    Toast.makeText(this,getString(R.string.addedToFavourites),Toast.LENGTH_SHORT).show();
+                } else {
+                    //delete from favourites
+                    databaseHelper.deleteFromFavourites(LoginActivity.username,movie);
+                    addToFavourites.setImageDrawable(getDrawable(R.drawable.ic_favorite_border_black_24dp));
+
+                    Toast.makeText(this,getString(R.string.removedFromFavourites),Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+        }
     }
 }

@@ -26,4 +26,10 @@
     <string name="rememberMe">Remember me</string>
     <string name="uploadPicture">Upload picture</string>
     <string name="relatedMovies">Related movies:</string>
+    <string name="addedToFavourites">Movie added to favourites!</string>
+    <string name="removedFromFavourites">Movie removed from favourites!</string>
+    <string name="changePassword">Change password</string>
+    <string name="cancel">Cancel</string>
+    <string name="passwordChanged">Password changed successfully!</string>
+    <string name="logOut">Logout</string>
 </resources>

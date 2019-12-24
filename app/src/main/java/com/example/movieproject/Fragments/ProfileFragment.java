@@ -1,7 +1,10 @@
 package com.example.movieproject.Fragments;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -15,23 +18,30 @@ import androidx.fragment.app.Fragment;
 import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.movieproject.Activities.HomeActivity;
+import com.example.movieproject.Activities.LoginActivity;
 import com.example.movieproject.Helpers.DatabaseHelper;
 import com.example.movieproject.R;
+import com.example.movieproject.Utilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -41,9 +51,7 @@ import static android.app.Activity.RESULT_OK;
 public class ProfileFragment extends Fragment implements View.OnClickListener {
     private String currentUserEmail, currentUserName;
     private DatabaseHelper databaseHelper;
-    private Button uploadPicture;
-    private ImageView profilePicture;
-    private Bitmap imageBitmap;
+    private Bitmap profilePicture;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -64,8 +72,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         currentUserEmail = ((HomeActivity) getActivity()).getCurrentUserEmail();
         databaseHelper = new DatabaseHelper(getContext());
 
-        uploadPicture = getView().findViewById(R.id.uploadPictureButton);
+        Button uploadPicture = getView().findViewById(R.id.uploadPictureButton);
         uploadPicture.setOnClickListener(this);
+        Button changePassword = getView().findViewById(R.id.changePassword);
+        changePassword.setOnClickListener(this);
+        TextView logOut = getView().findViewById(R.id.logOut);
+        logOut.setOnClickListener(this);
 
         setUserData();
     }
@@ -75,13 +87,76 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         currentUserName = databaseHelper.getUsername(currentUserEmail);
         username.setText(currentUserName);
 
-        profilePicture = getView().findViewById(R.id.profilePicture);
-        Glide.with(getContext()).load(databaseHelper.getImage(currentUserName)).into(profilePicture);
+        ImageView profilePicture = getView().findViewById(R.id.profilePicture);
+        //Glide.with(getContext()).load(databaseHelper.getImage(currentUserName)).into(profilePicture);
     }
 
     @Override
     public void onClick(View v) {
-        getImageFromGallery();
+        switch (v.getId()){
+            case R.id.uploadPictureButton:
+                getImageFromGallery();
+                break;
+            case R.id.changePassword:
+                showDialog();
+                break;
+            case R.id.logOut:
+                Utilities.clearLoginData(getContext());
+
+                //go to login screen
+                Intent login = new Intent(getActivity(), LoginActivity.class);
+                startActivity(login);
+                break;
+        }
+    }
+
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(getString(R.string.changePassword));
+        builder.setView(R.layout.change_password);
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        final EditText password = dialog.findViewById(R.id.passwordInput);
+        final EditText confirmPassword = dialog.findViewById(R.id.confirmPassword);
+        Button cancelButton = dialog.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        Button sendButton = dialog.findViewById(R.id.sendButton);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (validateInputs(password,confirmPassword)){
+                    String newPassword = password.getText().toString().trim();
+                    databaseHelper.changePassword(currentUserName,newPassword);
+
+                    dialog.dismiss();
+                    Toast.makeText(getContext(),getString(R.string.passwordChanged),Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private boolean validateInputs(EditText newPassword, EditText confirmPassword) {
+        String password = newPassword.getText().toString().trim();
+        if (password.isEmpty() || password.length() < 6){
+            newPassword.setError(getString(R.string.passwordLengthError));
+            newPassword.requestFocus();
+            return false;
+        }
+
+        if (!password.equals(confirmPassword.getText().toString().trim())){
+            confirmPassword.setError(getString(R.string.confirmPasswordError));
+            confirmPassword.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private void getImageFromGallery() {
@@ -93,11 +168,33 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK)
+        if (resultCode == RESULT_OK && data != null && data.getData() != null)
         {
-            //store image
+            try {
+                profilePicture = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(),data.getData());
+
+                storeImage(profilePicture);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    private void storeImage(Bitmap bitmapImage) {
+        Log.d("movies",bitmapImage.toString());
+        ContextWrapper cw = new ContextWrapper(getActivity().getApplicationContext());
+            File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        File file = new File(directory,currentUserName.concat(".jpg"));
 
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            Log.d("movies","image");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -3,8 +3,11 @@ package com.example.movieproject.Helpers;
 import com.example.movieproject.Classes.ImagesReponse;
 import com.example.movieproject.Classes.Movie;
 import com.example.movieproject.Classes.MoviesResponse;
+import com.example.movieproject.Classes.NowPlayingResponse;
 import com.example.movieproject.Classes.RecommendationsResponse;
 import com.example.movieproject.Classes.VideoResponse;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -29,4 +32,7 @@ public interface MovieDbAPI {
 
     @GET("movie/{id}")
     Call<Movie> getMovieDetails(@Path("id") int id, @Query("api_key") String apiKey);
+
+    @GET("movie/now_playing")
+    Call<NowPlayingResponse> getNowPlaying(@Query("api_key") String apiKey);
 }

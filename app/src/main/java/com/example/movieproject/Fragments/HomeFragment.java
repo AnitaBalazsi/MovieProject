@@ -113,7 +113,7 @@ public class HomeFragment extends Fragment implements SearchView.OnQueryTextList
     public void onMovieClick(int position){
         //open detail screen
         Intent intent = new Intent(getActivity(), DetailsActivity.class);
-        intent.putExtra("movieId",adapter.getMovieList().get(position).getId());
+        intent.putExtra("selectedMovie",adapter.getMovieList().get(position));
         startActivity(intent);
     }
 
