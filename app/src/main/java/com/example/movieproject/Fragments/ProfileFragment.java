@@ -2,12 +2,14 @@ package com.example.movieproject.Fragments;
 
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -39,6 +41,7 @@ import com.example.movieproject.Utilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,7 +91,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         username.setText(currentUserName);
 
         ImageView profilePicture = getView().findViewById(R.id.profilePicture);
-        //Glide.with(getContext()).load(databaseHelper.getImage(currentUserName)).into(profilePicture);
+        Glide.with(getContext()).load(databaseHelper.getImage(currentUserName)).into(profilePicture);
     }
 
     @Override
@@ -172,29 +175,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         {
             try {
                 profilePicture = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(),data.getData());
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                profilePicture.compress(Bitmap.CompressFormat.JPEG,100,stream);
 
-                storeImage(profilePicture);
-
+                databaseHelper.insertImage(currentUserName,stream.toByteArray());
+                setUserData();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void storeImage(Bitmap bitmapImage) {
-        Log.d("movies",bitmapImage.toString());
-        ContextWrapper cw = new ContextWrapper(getActivity().getApplicationContext());
-            File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        File file = new File(directory,currentUserName.concat(".jpg"));
-
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
-            fileOutputStream.flush();
-            fileOutputStream.close();
-            Log.d("movies","image");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

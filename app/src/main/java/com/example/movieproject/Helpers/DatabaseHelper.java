@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.example.movieproject.Classes.Movie;
 import com.example.movieproject.Classes.User;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + USERS_TABLE + " (NAME TEXT PRIMARY KEY, EMAIL TEXT, PASSWORD TEXT)");
-        db.execSQL("CREATE TABLE " + IMAGES_TABLE + " (NAME TEXT PRIMARY KEY, IMAGEDATA BLOB)");
+        db.execSQL("CREATE TABLE " + IMAGES_TABLE + " (NAME TEXT, IMAGEDATA BLOB)");
         db.execSQL("CREATE TABLE " + FAVOURITES_TABLE + " (NAME TEXT, ID INTEGER, MOVIE_TITLE TEXT, MOVIE_DATE TEXT, OVERVIEW TEXT, IMAGE_PATH TEXT, VOTE_AVERAGE REAL, PRIMARY KEY(NAME,ID)) ");
         db.execSQL("CREATE TABLE " + NOWPLAYING_TABLE + " (ID INTEGER PRIMARY KEY, MOVIE_TITLE TEXT, MOVIE_DATE TEXT, OVERVIEW TEXT, IMAGE_PATH TEXT, VOTE_AVERAGE REAL) ");
     }
@@ -125,24 +127,57 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    public long insertImage(String username, byte[] imageData){
+    public void insertImage(String username, byte[] imageData){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name",username);
         contentValues.put("imagedata",imageData);
 
-        return db.insert(IMAGES_TABLE, null, contentValues);
+        if (checkIfHasImage(username)){
+            db.update(IMAGES_TABLE,contentValues, "name = " + "'" + username + "'", null);
+        } else {
+            db.insert(IMAGES_TABLE, null, contentValues);
+        }
+    }
+
+    public boolean checkIfHasImage(String username){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT 1 FROM " + IMAGES_TABLE + " WHERE NAME= '" + username + "'", null);
+
+        cursor.moveToFirst();
+        return cursor.getInt(0) > 0;
+
     }
 
     public Bitmap getImage(String username){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT imagedata FROM " + IMAGES_TABLE + " WHERE NAME= '" + username + "'", null);
-        if (cursor.moveToFirst())
-        {
-           Log.d("movies",cursor.getString(0));
+        int position = 1, size = getImageSize(username);
+
+        byte[] imageBytes = new byte[size];
+        ByteBuffer buffer = ByteBuffer.wrap(imageBytes);
+
+        while (size > 0){
+            Cursor cursor = db.rawQuery("SELECT substr(imagedata, " + position + "," + 1000000 + ") FROM " + IMAGES_TABLE + " WHERE NAME= '" + username + "'", null);
+            if (cursor.moveToFirst()){
+                //concat results
+                buffer.put(cursor.getBlob(0));
+            }
+            size = size - 1000000;
+            position = position + 1000000;
         }
-        cursor.close();
-        return null;
+
+        //convert byte array to bitmap
+        return BitmapFactory.decodeByteArray(imageBytes,0,imageBytes.length);
+    }
+
+    public int getImageSize(String username){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT length(imagedata) FROM " + IMAGES_TABLE + " WHERE NAME= '" + username + "'", null);
+        if (cursor.moveToFirst()){
+            return cursor.getInt(0);
+        } else {
+            return 0;
+        }
     }
 
     public void changePassword(String username, String password){
