@@ -103,7 +103,7 @@ public class HomeFragment extends Fragment implements SearchView.OnQueryTextList
         adapter = new MovieListAdapter(new ArrayList<Movie>(),this);
         recyclerView.setAdapter(adapter);
 
-        loadingDialog = new ProgressDialog(getContext());
+        loadingDialog = new ProgressDialog(getContext(), R.style.ProgressDialog);
         loadingDialog.setMessage(getString(R.string.loading));
 
         SearchView searchView = getView().findViewById(R.id.searchView);
@@ -138,18 +138,23 @@ public class HomeFragment extends Fragment implements SearchView.OnQueryTextList
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        MovieDb.getInstance().searchMovie(MovieDb.API_KEY,pageNumber,query).enqueue(new Callback<MoviesResponse>() {
-            @Override
-            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
-               adapter.setMovieList(response.body().getMovies());
-               adapter.notifyDataSetChanged();
-            }
+        if (!query.isEmpty()){
+            MovieDb.getInstance().searchMovie(MovieDb.API_KEY,pageNumber,query).enqueue(new Callback<MoviesResponse>() {
+                @Override
+                public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+                    adapter.setMovieList(response.body().getMovies());
+                    adapter.notifyDataSetChanged();
+                }
 
-            @Override
-            public void onFailure(Call<MoviesResponse> call, Throwable t) {
+                @Override
+                public void onFailure(Call<MoviesResponse> call, Throwable t) {
 
-            }
-        });
+                }
+            });
+        } else {
+            pageNumber = 1;
+            getData();
+        }
         return false;
     }
 
@@ -169,6 +174,7 @@ public class HomeFragment extends Fragment implements SearchView.OnQueryTextList
                 }
             });
         } else {
+            pageNumber = 1;
             getData();
         }
         return false;

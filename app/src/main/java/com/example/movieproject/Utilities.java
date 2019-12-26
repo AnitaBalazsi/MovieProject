@@ -3,7 +3,10 @@ package com.example.movieproject;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.core.content.ContextCompat;
@@ -31,5 +34,14 @@ public class Utilities {
 
         editor.clear();
         editor.apply();
+    }
+
+    public static void setStatusbarColor(Activity activity){
+        Window window = activity.getWindow();
+        Drawable background = activity.getResources().getDrawable(R.drawable.app_background);
+
+        window.setStatusBarColor(activity.getResources().getColor(android.R.color.transparent));
+        window.setNavigationBarColor(activity.getResources().getColor(android.R.color.transparent));
+        window.setBackgroundDrawable(background);
     }
 }

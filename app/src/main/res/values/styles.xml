@@ -2,10 +2,18 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="editTextColor">@color/colorBlueStart</item>
+        <item name="android:textColorHint">@color/colorBlueStart</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="ProgressDialog" parent="@style/Theme.AppCompat.Dialog">
+        <item name="android:textColor">@color/colorBlueEnd</item>
+        <item name="android:background">@color/colorWhite</item>
     </style>
 
 </resources>

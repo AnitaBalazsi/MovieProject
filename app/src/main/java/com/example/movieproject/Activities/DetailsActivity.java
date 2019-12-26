@@ -46,6 +46,7 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
         setContentView(R.layout.activity_details);
 
 
+        Utilities.setStatusbarColor(this);
         initializeVariables();
         getMovieTrailer();
         getImages();
@@ -85,18 +86,18 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
     }
 
     private void loadRecommendations(List<Movie> movies) {
-        for (final Movie movie : movies){
+        for (final Movie recommendation : movies){
             LinearLayout layout = new LinearLayout(this);
             layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             layout.setOrientation(LinearLayout.VERTICAL);
 
             TextView title = new TextView(this);
             title.setPadding(60,0,0,0);
-            title.setText(movie.getTitle());
+            title.setText(recommendation.getTitle());
 
             ImageView imageView = new ImageView(this);
             imageView.setLayoutParams(new LinearLayout.LayoutParams(400,400));
-            Glide.with(imageView.getContext()).load(MovieDb.IMAGE_BASE_URL.concat(movie.getPosterPath())).into(imageView);
+            Glide.with(imageView.getContext()).load(MovieDb.IMAGE_BASE_URL.concat(recommendation.getPosterPath())).into(imageView);
 
             layout.addView(imageView);
             layout.addView(title);
@@ -104,9 +105,8 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
                 @Override
                 public void onClick(View v) {
                     //reloads activity with selected recommendation
-
                     finish();
-                    startActivity(getIntent().putExtra("movieId",movie.getId()));
+                    startActivity(getIntent().putExtra("selectedMovie",recommendation));
                 }
             });
 
@@ -142,6 +142,7 @@ public class DetailsActivity extends YouTubeBaseActivity implements View.OnClick
     private void initializeVariables() {
         databaseHelper = new DatabaseHelper(this);
         movie = (Movie) getIntent().getSerializableExtra("selectedMovie");
+        Log.d("movies",movie.getTitle());
 
         videoView = findViewById(R.id.movieTrailer);
         imageContainer = findViewById(R.id.images);

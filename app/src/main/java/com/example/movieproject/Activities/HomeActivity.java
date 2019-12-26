@@ -16,6 +16,7 @@ import com.example.movieproject.Fragments.HomeFragment;
 import com.example.movieproject.Fragments.NowPlayingFragment;
 import com.example.movieproject.Fragments.ProfileFragment;
 import com.example.movieproject.R;
+import com.example.movieproject.Utilities;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, ViewPager.OnPageChangeListener {
@@ -30,6 +31,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        Utilities.setStatusbarColor(this);
         initializeVariables();
         setupViewPager();
     }

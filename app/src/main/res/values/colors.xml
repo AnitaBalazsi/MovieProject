@@ -6,5 +6,8 @@
     <color name="colorRed">#FF0000</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorYellow">#FFFF00</color>
-    <color name="colorBlueBackground">#0C005B</color>
+    <color name="colorBlueEnd">#192943</color>
+    <color name="colorBlueCenter">#2A3c58</color>
+    <color name="colorBlueStart">#3D5069</color>
+    <color name="colorBlack">#000000</color>
 </resources>

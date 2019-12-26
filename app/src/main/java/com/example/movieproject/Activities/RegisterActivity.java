@@ -25,6 +25,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        Utilities.setStatusbarColor(this);
         initializeVariables();
     }
 

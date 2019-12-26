@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/viewContainer"
+    android:background="@drawable/app_background"
     tools:context=".Activities.RegisterActivity">
 
     <TextView
@@ -14,60 +15,88 @@
         android:textSize="30sp"
         android:textAlignment="center"
         android:textAllCaps="true"
-        android:layout_margin="30dp"
+        android:layout_marginTop="150dp"
         android:text="@string/registration" />
 
-    <EditText
-        android:id="@+id/usernameInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/registrationTitle"
-        android:inputType="textPersonName"
-        android:textSize="15sp"
-        android:padding="10dp"
-        android:layout_margin="10dp"
-        android:hint="@string/username"/>
-
-    <EditText
-        android:id="@+id/emailInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/usernameInput"
-        android:inputType="textEmailAddress"
-        android:textSize="15sp"
-        android:padding="10dp"
-        android:layout_margin="10dp"
-        android:hint="@string/email" />
-
-    <EditText
-        android:id="@+id/passwordInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/emailInput"
-        android:inputType="textPassword"
-        android:textSize="15sp"
-        android:padding="10dp"
-        android:layout_margin="10dp"
-        android:hint="@string/password" />
-
-    <EditText
-        android:id="@+id/confirmPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/passwordInput"
-        android:inputType="textPassword"
-        android:textSize="15sp"
-        android:padding="10dp"
-        android:layout_margin="10dp"
-        android:hint="@string/confirmPassword" />
-
-    <Button
-        android:id="@+id/sendButton"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/confirmPassword"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        android:text="@string/send" />
+        android:background="@color/colorWhite"
+        android:layout_below="@id/registrationTitle"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/usernameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:textSize="15sp"
+            android:padding="10dp"
+            android:layout_margin="10dp"
+            android:hint="@string/username"/>
+
+        <EditText
+            android:id="@+id/emailInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/usernameInput"
+            android:inputType="textEmailAddress"
+            android:textSize="15sp"
+            android:padding="10dp"
+            android:layout_margin="10dp"
+            android:hint="@string/email" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="false"
+            app:passwordToggleEnabled="true"
+            android:id="@+id/password"
+            android:layout_below="@id/emailInput">
+            <EditText
+                android:id="@+id/passwordInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textSize="15sp"
+                android:padding="10dp"
+                android:layout_margin="10dp"
+                android:hint="@string/password" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="false"
+            app:passwordToggleEnabled="true"
+            android:id="@+id/password2"
+            android:layout_below="@id/password">
+            <EditText
+                android:id="@+id/confirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/passwordInput"
+                android:inputType="textPassword"
+                android:textSize="15sp"
+                android:padding="10dp"
+                android:layout_margin="10dp"
+                android:hint="@string/confirmPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/password2"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/button_background"
+            android:text="@string/send" />
+    </RelativeLayout>
 
 </RelativeLayout>
